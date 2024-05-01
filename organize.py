@@ -9,7 +9,8 @@ zero = df.loc[df["Glaucoma"] == 0]
 one = df.loc[df["Glaucoma"] == 1]
 
 for f in one["Filename"]:
-    oldpath = str("ORIGA/Images/" + f)
+    print(f)
+    oldpath = str("ORIGA/Images_Square/" + f)
     print(oldpath)
-    newpath = str("ORIGA_SORTED/ORIGA_ONE/" + f)
+    newpath = str("ORIGA_square_sorted/1/" + f)
     os.replace(oldpath, newpath)
