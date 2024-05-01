@@ -1,5 +1,5 @@
 import tensorflow as tf
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import sys
@@ -42,41 +42,46 @@ ds_validation = tf.keras.preprocessing.image_dataset_from_directory(
     subset = "validation"
 )
 
-def create_network(hct, oct):
-    hidden_layer = tf.keras.layers.Dense(hct, activation='sigmoid') 
-    output_layer = tf.keras.layers.Dense(oct)
-
-    all_layers = [hidden_layer, output_layer]
-    network = tf.keras.models.Sequential(all_layers)
-
-    return network
-
-def train_network(network, training_X, training_y, oct, lr):
-
-    # create the algorithm that learns the weight of the network 
-    optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
-    # create the loss function function that tells optimizer how much error it has in its predictions
-    if oct == 1:
-        loss_function = tf.keras.losses.MeanSquaredError()
-        network.compile(optimizer=optimizer, loss=loss_function, metrics=["mse"])
-
+# displays a given image from the training set along with its label
+def view_image(index, training_X, training_y, label_names):
+    # get the label and image from the training set
+    label_num = training_y[index]
+    if len(label_num.shape) > 0:
+        label = label_names[training_y[index][0]]
     else:
-        loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-        network.compile(optimizer=optimizer, loss=loss_function, metrics=["accuracy"])
+        label = label_names[training_y[index]]
+    image = training_X[index]
 
-    # prepare the network for training
-
-    # create a logger to save the training details to file
-    csv_fname  = "est.csv"
-    # if oct > 1:
-    #     csv_fname = "accuracy.csv"
+    # show the label then the image
+    print("Label:", label)
+    plt.imshow(image)
+    plt.show()
 
 
-    csv_logger = tf.keras.callbacks.CSVLogger(csv_fname)
+def sep_x_y(ds):
+    set_X = []
+    set_y = []
 
-    # train the network for 250 epochs (setting aside 20% of the training data as validation data)
-    network.fit(training_X, training_y, validation_split=0.2, epochs=250, callbacks=[csv_logger])
+    for x, y in ds:
+        if not set_X:
+            set_X = [x]
+        else:
+            set_X = set_X.append(x)
+        if not set_y:
+            set_y = [y]
+        else:
+            set_y = set_y.append(y)
 
-#n= create_network(10, 2)
+    return set_X, set_y
 
-print(ds_training)
+
+training_X, training_y = sep_x_y(ds_training)
+testing_X, testing_y = sep_x_y(ds_validation)
+
+
+class_names = ds_training.class_names
+print(class_names)
+
+for i in range(0, len(class_names)-1):
+    view_image(i, training_X, training_y, class_names)
+
