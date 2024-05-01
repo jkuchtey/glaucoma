@@ -4,37 +4,51 @@ import pandas as pd
 import numpy as np
 import sys
 import os
+import pathlib
+import PIL
+import PIL.Image
 
 directory = sys.argv[1]
 
+labeldf = pd.read_csv(directory + "/OrigaList.csv")
 
-if directory == 'G1020':
+directory = directory + "/Images"
 
-    labeldata = pd.read_csv('G1020.csv')
-    for label in labeldata:
-        for image in os.listdir('GLAUCOMA/G1020/Images'):
-            if image.endswith(".jpg"):
+labeldf = labeldf[["Filename", "Glaucoma"]]
+
+l = labeldf.values.tolist()
+
+print(l)
+
+dataset = tf.keras.preprocessing.image_dataset_from_directory(
+    directory, 
+    labels = l, 
+    label_mode = "binary", 
+    class_names = None)
+    #labels = l, 
+    #label_mode = "binary")
+
+# for element in dataset:
+#   print(element)
+#   break
 
 
-                tf.keras.preprocessing.image_dataset_from_directory(
-                    directory,
-                    labels='inferred',
-                    label_mode="binary",
-                    class_names=None,
-                    color_mode='rgb',
-                    batch_size=32,
-                    image_size=(2656, 2048),
-                    shuffle=True,
-                    seed=None,
-                    validation_split=None,
-                    subset=None,
-                    interpolation='bilinear',
-                    follow_links=False,
-                    crop_to_aspect_ratio=False,
-                    pad_to_aspect_ratio=False,
-                    data_format=None,
-                    verbose=True
-                )
+    # label_mode="binary",
+    # class_names=None,
+    # color_mode='rgb',
+    # batch_size=32,
+    # image_size=(2656, 2048),
+    # shuffle=True,
+    # seed=None,
+    # validation_split=None,
+    # subset=None,
+    # interpolation='bilinear',
+    # follow_links=False,
+    # crop_to_aspect_ratio=False,
+    # pad_to_aspect_ratio=False,
+    # data_format=None,
+    # verbose=True
+
 
 # def create_cnn(training_X, training_y):
 #     # get the shape of each image so the the first layer knows what inputs it will receive
