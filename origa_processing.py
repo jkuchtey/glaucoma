@@ -16,49 +16,30 @@ hct = 10
 lr = 0.01
 
 
-ds_training = tf.keras.preprocessing.image_dataset_from_directory( 
-    directory, 
-    labels = "inferred", 
-    label_mode = "binary",
-    class_names = ["0", "1"], 
-    color_mode = 'rgb',
-    batch_size = batch_size, 
-    image_size = (4, 4), 
-    shuffle = True ,
-    seed = seed, 
-    validation_split = split, 
-    subset = "training"
-)
+# ds = tf.keras.preprocessing.image_dataset_from_directory( 
+#     directory, 
+#     labels = "inferred", 
+#     label_mode = "binary",
+#     class_names = ["0", "1"], 
+#     color_mode = 'rgb',
+#     batch_size = batch_size, 
+#     image_size = (10, 10), 
+#     shuffle = True ,
+#     seed = seed, 
+#     validation_split = split, 
+#     subset = "both", 
+# )
 
+ds = tf.keras.utils.image_dataset_from_directory(directory)
 
-ds_validation = tf.keras.preprocessing.image_dataset_from_directory( 
-    directory, 
-    labels = "inferred", 
-    label_mode = "binary",
-    class_names = ["0", "1"], 
-    color_mode = 'rgb',
-    batch_size = batch_size, 
-    image_size = (157, 128), 
-    shuffle = True,
-    seed = seed, 
-    validation_split = (1 - split), 
-    subset = "validation"
-)
+data_iterator = ds.as_numpy_iterator()
+batch = data_iterator.next()
+fig, ax = plt.subplots(ncols=4, figsize=(20,20))
+for idx, img in enumerate(batch[0][:4]):
+    ax[idx].imshow(img.astype(int))
+    ax[idx].title.set_text(batch[1][idx])
 
-# displays a given image from the training set along with its label
-def view_image(index, training_X, training_y, label_names):
-    # get the label and image from the training set
-    label_num = training_y[index]
-    if len(label_num.shape) > 0:
-        label = label_names[training_y[index][0]]
-    else:
-        label = label_names[training_y[index]]
-    image = training_X[index]
-
-    # show the label then the image
-    print("Label:", label)
-    plt.imshow(image)
-    plt.show()
+plt.show()
 
 
 def create_network(hct, oct):
@@ -86,10 +67,6 @@ def train_network(network, training_X, training_y, oct, lr):
 
     # create a logger to save the training details to file
     csv_fname  = "test.csv"
-    # if oct > 1:
-    #     csv_fname = "accuracy.csv"
-
-
     csv_logger = tf.keras.callbacks.CSVLogger(csv_fname)
 
     # train the network for 250 epochs (setting aside 20% of the training data as validation data)
@@ -115,12 +92,14 @@ def sep_x_y(ds):
 # training_X, training_y = sep_x_y(ds_training)
 # testing_X, testing_y = sep_x_y(ds_validation)
 
-train_x_batches = np.concatenate([x for x, y in ds_training], axis=0)
-train_y_batches = np.concatenate([y for x, y in ds_training], axis=0)
+# train_x_batches = np.concatenate([x for x, y in ds_training], axis=0)
+# train_y_batches = np.concatenate([y for x, y in ds_training], axis=0)
 
-print(train_x_batches.shape)
-print(train_y_batches.shape)
+print(ds)
 
+
+
+# print(train_x_batches)
 
 # x_train = ds_training.map(lambda i: i['image'])
 # y_train = ds_training.map(lambda l: l['label'])
@@ -129,8 +108,8 @@ print(train_y_batches.shape)
 
 
 
-n = create_network(hct, 2)
-train_network(n, train_x_batches, train_y_batches, 2, lr)
+# n = create_network(hct, 2)
+# train_network(n, train_x_batches, train_y_batches, 2, lr)
 
 
 
