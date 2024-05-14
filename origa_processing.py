@@ -46,14 +46,15 @@ data = tf.keras.utils.image_dataset_from_directory(
 
 
 #Scale images
-tt = []
-for i in [0, 1]:
-    ds = data[i].map(lambda x,y: (x/255, y))
-    tt.append(ds)
-    data[i].as_numpy_iterator().next()
+# tt = []
+# for i in [0, 1]:
+#     ds = data[i].map(lambda x,y: (x/255, y))
+#     tt.append(ds)
+#     data[i].as_numpy_iterator().next()
 
-training = tt[0]
-testing = tt[1]
+# training = tt[0]
+# testing = tt[1]
+
 
 def show_imgs(data):
     data_iterator = data.as_numpy_iterator()
@@ -87,6 +88,8 @@ def create_model(num_classes):
     tf.keras.layers.Dense(num_classes)
     ])
 
+
+
     model.compile(
     optimizer='adam',
     loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
@@ -97,14 +100,19 @@ def create_model(num_classes):
 
 
 def train_model(model, training, testing, epochs):
+    csv_fname  = "epoch_log.csv"
+
+    csv_logger = tf.keras.callbacks.CSVLogger(csv_fname)
+
     model.fit(
-    training,
-    validation_data=testing,
-    epochs=epochs
-)
+        training,
+        validation_data=testing,
+        epochs=epochs, 
+        callbacks=[csv_logger]
+    )
 
 model = create_model(2)
-train_model(model, data[0], data[1], 50)
+train_model(model, data[0], data[1], 250)
 
 # training_X, training_y = sep_x_y(ds_training)
 # testing_X, testing_y = sep_x_y(ds_validation)
@@ -121,4 +129,3 @@ train_model(model, data[0], data[1], 50)
 
 
 
-training
