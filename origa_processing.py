@@ -1,5 +1,6 @@
 import tensorflow as tf
 import tensorflow_datasets as tfds
+from tensorflow.keras import layers, models
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -8,6 +9,7 @@ import os
 import pathlib
 import PIL
 import PIL.Image
+import pprint
 
 directory = "ORIGA_square_sorted"
 batch_size = 32
@@ -15,15 +17,6 @@ seed = 1234
 split = 0.7
 hct = 10
 lr = 0.01
-
-
-
-
-
-
-
-
-
 
 # Scale images
 
@@ -133,7 +126,7 @@ def train_model(model, training, testing, epochs):
         callbacks=[csv_logger]
     )
 
-def create_cnn(training_X, training_y):
+def lab8_cnn(training_X, training_y):
     # get the shape of each image so the the first layer knows what inputs it will receive
     image_shape = training_X.shape[1:]
 
@@ -176,6 +169,35 @@ def train_network(network, training_X, training_y, epochs):
     network.fit(training_X, training_y, validation_split=0.2, epochs=epochs, callbacks=[csv_logger])
 
 
+def create_cnn():
+    model = models.Sequential()
+    model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
+    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
+    
+    model.add(layers.Flatten())
+    model.add(layers.Dense(64, activation='relu'))
+    model.add(layers.Dense(10))
+
+
+    return model
+
+def train_cnn(model, data, epochs):
+    model.compile(optimizer='adam',
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+
+    csv_logger = tf.keras.callbacks.CSVLogger('epochs.csv')
+
+    history = model.fit(
+        data[0], 
+        epochs=epochs, 
+        validation_data=(data[1]), 
+        callbacks=[csv_logger])
+
+    return history
 
 data = tf.keras.utils.image_dataset_from_directory(
     directory, 
@@ -184,6 +206,7 @@ data = tf.keras.utils.image_dataset_from_directory(
     validation_split=split, 
     subset="both", 
     labels="inferred", 
+    image_size=(32, 32), 
     label_mode="binary", 
     class_names=["0", "1"], 
     batch_size=batch_size
@@ -191,8 +214,22 @@ data = tf.keras.utils.image_dataset_from_directory(
 
 
 
-training_X, training_y, testing_X, testing_y = scale(data)
-print(len(training_X))
+n =create_cnn()
+history = train_cnn(n, data, 100)
+
+plt.plot(history.history['accuracy'], label='accuracy')
+plt.plot(history.history['val_accuracy'], label = 'val_accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.ylim([0.5, 1])
+plt.legend(loc='lower right')
+
+test_loss, test_acc = n.evaluate(data[1], verbose=2)
+
+
+
+# training_X, training_y, testing_X, testing_y = scale(data)
+# print(len(training_X))
 
 # training_X = tf.convert_to_tensor(training_X, dtype=tf.float32)
 # training_y = tf.convert_to_tensor(training_y, dtype=tf.float32)
@@ -203,13 +240,12 @@ print(len(training_X))
 
 
 
-
 # Sequential Model
 # model = create_model(2)
 # train_model(model, data[0], data[1], 3)
 
 #CNN
-cnn_network = create_cnn(training_X, training_y)
-train_network(cnn_network, training_X, training_y, 20)
+# cnn_network = create_cnn(training_X, training_y)
+# train_network(cnn_network, training_X, training_y, 20)
 
 
