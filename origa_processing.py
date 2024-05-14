@@ -16,7 +16,6 @@ directory = "ORIGA_cropped_sorted"
 batch_size = 32
 seed = 1234
 split = 0.7
-hct = 10
 lr = 0.01
 
 # Scale images
