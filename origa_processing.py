@@ -19,7 +19,7 @@ lr = 0.01
 ds_training = tf.keras.preprocessing.image_dataset_from_directory( 
     directory, 
     labels = "inferred", 
-    label_mode = "binary",
+    label_mode = "categorical",
     class_names = ["0", "1"], 
     color_mode = 'rgb',
     batch_size = batch_size, 
