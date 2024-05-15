@@ -208,6 +208,8 @@ def compare_lrs(n, data, lr):
 
     return accs
 
+
+
 def plot_lrs(df):
     print(df)
     acc_bar = (
@@ -244,6 +246,16 @@ def compare_batch_size():
 # accs = compare_batch_size()
 # print(accs)
 
+def plot_epochs(history):
+    plt.plot(history.history['accuracy'], label='accuracy')
+    plt.plot(history.history['val_accuracy'], label = 'val_accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.ylim([0.5, 1])
+    plt.legend(loc='lower right')
+
+    plt.show()
+
 data = tf.keras.utils.image_dataset_from_directory(
     directory, 
     shuffle=True, 
@@ -265,15 +277,7 @@ print(test_acc)
 
 
 
-def plot_epochs(history):
-    plt.plot(history.history['accuracy'], label='accuracy')
-    plt.plot(history.history['val_accuracy'], label = 'val_accuracy')
-    plt.xlabel('Epoch')
-    plt.ylabel('Accuracy')
-    plt.ylim([0.5, 1])
-    plt.legend(loc='lower right')
 
-    plt.show()
 
 
 
@@ -293,5 +297,3 @@ def plot_epochs(history):
 #CNN
 # cnn_network = create_cnn(training_X, training_y)
 # train_network(cnn_network, training_X, training_y, 20)
-
-
