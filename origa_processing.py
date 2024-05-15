@@ -17,7 +17,7 @@ batch_size = 32
 seed = 1234
 split = 0.25
 hct = 10
-lr = 0.01
+lr = 0.0001
 
 # Scale images
 
@@ -208,15 +208,25 @@ def compare_lrs(n, data):
 
     return accs
 
-def plot_lrs(df):
-    print(df)
+def plot_bars(df, x, y, fill, title, filename):
+
     acc_bar = (
         ggplot(df)
-        + aes(x="Learning Rate", y="Accuracy", color="factor(Learning Rate)") 
+        + aes(x=x, y=y, fill=fill) 
         + geom_col()
-        + ggtitle("Learning Rate Comparison")
+        + ggtitle(title)
     )
-    acc_bar.save(filename="lr_comparison.png")
+    acc_bar.save(filename=filename)
+
+def plot_epochs(history):
+    plt.plot(history.history['accuracy'], label='accuracy')
+    plt.plot(history.history['val_accuracy'], label = 'val_accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.ylim([0.5, 1])
+    plt.legend(loc='lower right')
+
+    plt.show()
 
 
 def compare_batch_size():
@@ -234,67 +244,57 @@ def compare_batch_size():
             class_names=["0", "1"], 
             batch_size=bs
         )
+        n = create_cnn()
         history = train_cnn(n, data, 100, 0.001)
         test_loss, test_acc = n.evaluate(data[1], verbose=2)
         accs[bs] = test_acc
 
     return accs
 
+
+#Create CSV Comparing Batch Sizes
 # accs = compare_batch_size()
 # print(accs)
+# bs_comp_df = pd.DataFrame.from_dict(accs, orient='index')
+# bs_comp_df.to_csv("batch_size_comparison" + directory + )
 
-data = tf.keras.utils.image_dataset_from_directory(
-    directory, 
-    shuffle=True, 
-    seed=seed, 
-    validation_split=split, 
-    subset="both", 
-    labels="inferred", 
-    image_size=(32, 32), 
-    label_mode="binary", 
-    class_names=["0", "1"], 
-    batch_size=32
-)
+
+#Plot accuracies comparing batch size
+# bs_comp_df = pd.read_csv("batch_size_comparison.csv")
+# bs_comp_df["Batch Size"] = bs_comp_df["Batch Size"].astype(str)
+# plot_bars(bs_comp_df, "Batch Size", "Accuracy", "Batch Size", "Batch Size Accuracy Comparison",  "bs_comparison.png")
+
+# Single Run
+# data = tf.keras.utils.image_dataset_from_directory(
+#     directory, 
+#     shuffle=True, 
+#     seed=seed, 
+#     validation_split=split, 
+#     subset="both", 
+#     labels="inferred", 
+#     image_size=(32, 32), 
+#     label_mode="binary", 
+#     class_names=["0", "1"], 
+#     batch_size=32
+# )
 # history = train_cnn(n, data, 100, 0.001)
 # test_loss, test_acc = n.evaluate(data[1], verbose=2)
 # print(test_acc)
 
+
+# Create CSV of compared learning rates
 # n =create_cnn()
 # accs = compare_lrs(n, data)
 # accs_df = pd.DataFrame.from_dict(accs, orient='index')
-# accs_df.to_csv("origa_accuracies.csv")
-
-
-plot_lrs(pd.read_csv("origa_accuracies.csv"))
-
-
-
-def plot_epochs(history):
-    plt.plot(history.history['accuracy'], label='accuracy')
-    plt.plot(history.history['val_accuracy'], label = 'val_accuracy')
-    plt.xlabel('Epoch')
-    plt.ylabel('Accuracy')
-    plt.ylim([0.5, 1])
-    plt.legend(loc='lower right')
-
-    plt.show()
+# accs_df.to_csv("origa_lr_accuracies.csv")
 
 
 
 
-# training_X, training_y, testing_X, testing_y = scale(data)
-# print(len(training_X))
+# Plot the learning rate CSV
+# lr_comp_df = pd.read_csv("origa_accuracies.csv")
+# lr_comp_df["Learning Rate"] = lr_comp_df["Learning Rate"].astype(str)
+# plot_bars(lr_comp_df, "Learning Rate", "Accuracy", "Learning Rate", "Learning Rate Accuracy Comparison",  "lr_comparison.png")
 
 
-
-
-
-
-# Sequential Model
-# model = create_model(2)
-# train_model(model, data[0], data[1], 3)
-
-#CNN
-# cnn_network = create_cnn(training_X, training_y)
-# train_network(cnn_network, training_X, training_y, 20)
 
