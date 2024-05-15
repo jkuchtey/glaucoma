@@ -11,7 +11,7 @@ import PIL.Image
 import pprint
 from plotnine import *
 
-itype = "cropped"
+itype = "square"
 
 directory = "ORIGA_" + itype + "_sorted"
 batch_size = 32
@@ -121,32 +121,6 @@ def train_model(model, training, testing, epochs):
         epochs=epochs, 
         callbacks=[csv_logger]
     )
-
-def lab8_cnn(training_X, training_y):
-    # get the shape of each image so the the first layer knows what inputs it will receive
-    image_shape = training_X.shape[1:]
-
-    # if the image was grayscale, add a 1 to the end of the shape to make it 3D
-    if len(image_shape) == 2:
-        image_shape = (image_shape[0], image_shape[1], 1)
-
-    # get the number of possible labels (since this is a classification task)
-    num_labels = len(np.unique(testing_y))
-    
-    # create the layers
-    conv1 = tf.keras.layers.Conv2D(16, (3, 3), activation = "relu", input_shape=image_shape)
-    pool1 = tf.keras.layers.MaxPooling2D((2, 2))
-    flat = tf.keras.layers.Flatten()
-    dense = tf.keras.layers.Dense(128)
-    out = tf.keras.layers.Dense(num_labels)
-
-    # convert the layers into a neural network model
-    layers = [conv1, pool1, flat, dense, out]    
-    # layers = [conv1, pool1, conv2, flat, dense, out]    
-    # layers = [conv1, pool1, conv2, pool2, conv3, flat, dense, out]    
-    network = tf.keras.models.Sequential(layers)
-
-    return network
 
 def train_network(network, training_X, training_y, epochs):
     # create the algorithm that learns the weight of the network (with a learning rate of 0.0001)
@@ -261,9 +235,9 @@ def compare_batch_size():
 
 
 #Plot accuracies comparing batch size
-bs_comp_df = pd.read_csv("batch_size_comparison_ORIGA_cropped.csv")
+bs_comp_df = pd.read_csv("batch_size_comparison_ORIGA_" + itype + ".csv")
 bs_comp_df["Batch Size"] = bs_comp_df["Batch Size"].astype(str)
-plot_bars(bs_comp_df, "Batch Size", "Accuracy", "Batch Size", "Batch Size Accuracy Comparison",  "bs_comparison.png")
+plot_bars(bs_comp_df, "Batch Size", "Accuracy", "Batch Size", "Batch Size Accuracy Comparison " + itype,  "bs_comparison_" + itype + ".png" )
 
 # Single Run
 # data = tf.keras.utils.image_dataset_from_directory(
