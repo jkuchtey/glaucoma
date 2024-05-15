@@ -11,7 +11,9 @@ import PIL.Image
 import pprint
 from plotnine import *
 
-itype = "cropped"
+itype = "square"
+
+g1020_dir = "G1020_sorted"
 
 directory = "ORIGA_" + itype + "_sorted"
 batch_size = 32
@@ -51,7 +53,7 @@ def create_cnn():
     model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-    model.add(layers.MoraxPooling2D((2, 2)))
+    model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.Conv2D(64, (3, 3), activation='relu'))
 
     model.add(layers.Flatten())
@@ -89,16 +91,17 @@ def compare_lrs(n, data, lr):
 
     return accs
 
-def plot_lrs(df):
-    print(df)
+def plot_bars(df, x, y, fill, title, filename):
+
     acc_bar = (
         ggplot(df)
-        + aes(x="Learning Rate", y="Accuracy", fill="Learning Rate")
+        + aes(x=x, y=y, fill=fill) 
         + geom_col()
-        + ggtitle("Learning Rate Comparison")
-        + scale_alpha()
+        + ggtitle(title)
     )
-    acc_bar.save(filename="lr_comparison.png")
+    acc_bar.save(filename=filename)
+
+
 
 n =create_cnn()
 def compare_batch_size():
@@ -122,6 +125,10 @@ def compare_batch_size():
 
     return accs
 
+
+
+# Create CSV to compare Batch sizes
+
 # accs = compare_batch_size()
 # print(accs)
 # bs_comp_df = pd.DataFrame.from_dict(accs, orient='index')
@@ -129,6 +136,7 @@ def compare_batch_size():
 
 
 #Plot accuracies comparing batch size
+
 # bs_comp_df = pd.read_csv("batch_size_comparison_ORIGA_" + itype + ".csv")
 # print(bs_comp_df)
 # bs_comp_df["Batch Size"] = bs_comp_df["Batch Size"].astype(str)
@@ -138,13 +146,52 @@ def compare_batch_size():
 
 
 # Create CSV of compared learning rates
+
 # n =create_cnn()
 # accs = compare_lrs(n, data)
 # accs_df = pd.DataFrame.from_dict(accs, orient='index')
 # accs_df.to_csv("origa_lr_accuracies.csv")
 
+# Plot the learning rate CSV
+
+# lr_comp_df = pd.read_csv("origa_accuracies.csv")
+# lr_comp_df["Learning Rate"] = lr_comp_df["Learning Rate"].astype(str)
+# plot_bars(lr_comp_df, "Learning Rate", "Accuracy", "Learning Rate", "Learning Rate Accuracy Comparison",  "lr_comparison.png")
+
+
+# Measure accuracy on G1020 dataset
+
+
+data = tf.keras.utils.image_dataset_from_directory(
+    directory, 
+    shuffle=True, 
+    seed=seed, 
+    validation_split=split, 
+    subset="both", 
+    labels="inferred", 
+    image_size=(32, 32), 
+    label_mode="binary", 
+    class_names=["0", "1"], 
+    batch_size=32
+)
+g1020 = tf.keras.utils.image_dataset_from_directory(
+    g1020_dir, 
+    shuffle=True, 
+    labels="inferred", 
+    image_size=(32, 32), 
+    label_mode="binary", 
+    class_names=["0", "1"], 
+    batch_size=32
+)
+
+n = create_cnn()
+history = train_cnn(n, data, 100, 0.001)
+test_loss, test_acc = n.evaluate(g1020, verbose=2)
+print(test_acc)
+
 
 # Single Run
+
 # data = tf.keras.utils.image_dataset_from_directory(
 #     directory, 
 #     shuffle=True, 
@@ -161,10 +208,7 @@ def compare_batch_size():
 # test_loss, test_acc = n.evaluate(data[1], verbose=2)
 # print(test_acc)
 
-# Plot the learning rate CSV
-# lr_comp_df = pd.read_csv("origa_accuracies.csv")
-# lr_comp_df["Learning Rate"] = lr_comp_df["Learning Rate"].astype(str)
-# plot_bars(lr_comp_df, "Learning Rate", "Accuracy", "Learning Rate", "Learning Rate Accuracy Comparison",  "lr_comparison.png")
+
 
 
 

@@ -2,9 +2,9 @@ import pandas as pd
 
 import os
 
-g1020 = pd.read_csv("G1020/G1020.csv")
-g1020zero = g1020.loc[g1020["Glaucoma"] == 0]
-df = pd.read_csv("ORIGA/OrigaList.csv")
+# g1020 = pd.read_csv("G1020/G1020.csv")
+# g1020zero = g1020.loc[g1020["Glaucoma"] == 0]
+# df = pd.read_csv("ORIGA/OrigaList.csv")
 
 # zero = df.loc[df["Glaucoma"] == 0]
 # one = df.loc[df["Glaucoma"] == 1]
@@ -21,6 +21,24 @@ df = pd.read_csv("ORIGA/OrigaList.csv")
 
 check = input("MAKE SURE FILE PATHS ARE CORECT !!!!!!!!! TYPE YES TO CLAIM!!!!!")
 
+def move_g1020(csv_path, original_path, new_path):
+    if check == "YES":
+        g_df = pd.read_csv(csv_path)
+        zero = g_df[g_df["binaryLabels"] == 0]
+        one = g_df[g_df["binaryLabels"] == 1]
+
+
+        labels = [zero, one]
+        for i in [0, 1]:
+            for f in labels[i]["imageID"]:
+                print(f)
+                oldpath = str(original_path + f)
+                print(oldpath)
+                if i == 0:
+                     newpath = str(new_path + "0/" + f)
+                if i == 1:
+                    newpath = str(new_path + "1/" + f)  
+                os.replace(oldpath, newpath)
 
 def move():
     if check == "YES":
@@ -47,4 +65,4 @@ def move():
                 os.replace(oldpath, newpath)
             
 
-move()
+move_g1020("G1020/G1020.csv", "G1020/Images/", "G1020_sorted/")
