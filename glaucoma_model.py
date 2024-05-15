@@ -7,81 +7,71 @@ import os
 import shutil
 
 
-def train_validate(directory, batch_size, seed, split):
-    ds_training = tf.keras.preprocessing.image_dataset_from_directory( 
-        directory, 
-        labels = "inferred", 
-        label_mode = "binary",
-        class_names = ["0", "1"], 
-        color_mode = 'rgb',
-        image_size = (2106, 1944), 
-        shuffle = True ,
-        seed = seed, 
-        validation_split = split, 
-        subset = "both"
-    )
-    ds_validation = tf.keras.preprocessing.image_dataset_from_directory( 
-        directory, 
-        labels = "inferred", 
-        label_mode = "binary",
-        class_names = ["0", "1"], 
-        color_mode = 'rgb',
-        image_size = (2106, 1944), 
-        shuffle = True,
-        seed = seed, 
-        validation_split = (1 - split), 
-        subset = "validation"
-    )
+# def train_validate(directory, batch_size, seed, split):
+#     ds_training = tf.keras.preprocessing.image_dataset_from_directory( 
+#         directory, 
+#         labels = "inferred", 
+#         label_mode = "binary",
+#         class_names = ["0", "1"], 
+#         color_mode = 'rgb',
+#         image_size = (2106, 1944), 
+#         shuffle = True ,
+#         seed = seed, 
+#         validation_split = split, 
+#         subset = "both"
+#     )
+#     ds_validation = tf.keras.preprocessing.image_dataset_from_directory( 
+#         directory, 
+#         labels = "inferred", 
+#         label_mode = "binary",
+#         class_names = ["0", "1"], 
+#         color_mode = 'rgb',
+#         image_size = (2106, 1944), 
+#         shuffle = True,
+#         seed = seed, 
+#         validation_split = (1 - split), 
+#         subset = "validation"
+#     )
 
-# displays a given image from the training set along with its label
-def view_image(index, training_X, training_y, label_names):
-    # get the label and image from the training set
-    label_num = training_y[index]
-    if len(label_num.shape) > 0:
-        label = label_names[training_y[index][0]]
-    else:
-        label = label_names[training_y[index]]
-    image = training_X[index]
+# # displays a given image from the training set along with its label
+# def view_image(index, training_X, training_y, label_names):
+#     # get the label and image from the training set
+#     label_num = training_y[index]
+#     if len(label_num.shape) > 0:
+#         label = label_names[training_y[index][0]]
+#     else:
+#         label = label_names[training_y[index]]
+#     image = training_X[index]
 
-    # show the label then the image
-    print("Label:", label)
-    plt.imshow(image)
-    plt.show()
-
-
-def create_network(hct, oct):
-    hidden_layer = tf.keras.layers.Dense(hct, activation='sigmoid') 
-    output_layer = tf.keras.layers.Dense(oct)
-
-    all_layers = [hidden_layer, output_layer]
-    network = tf.keras.models.Sequential(all_layers)
-
-    return network
-
-def train_network(network, training_X, training_y, oct, lr):
-    # create the algorithm that learns the weight of the network 
-    optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
-    # create the loss function function that tells optimizer how much error it has in its predictions
-    if oct == 1:
-        loss_function = tf.keras.losses.MeanSquaredError()
-        network.compile(optimizer=optimizer, loss=loss_function, metrics=["mse"])
-
-    else:
-        loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-        network.compile(optimizer=optimizer, loss=loss_function, metrics=["accuracy"])
-
-    # prepare the network for training
-
-    # create a logger to save the training details to file
-    csv_fname  = "test.csv"
-    # if oct > 1:
-    #     csv_fname = "accuracy.csv"
+#     # show the label then the image
+#     print("Label:", label)
+#     plt.imshow(image)
+#     plt.show()
 
 
-    csv_logger = tf.keras.callbacks.CSVLogger(csv_fname)
+# def create_network(hct, oct):or image in os.listdir('G1020/Images'):
+#     if image in g1020zero['imageID']:
+#         os.replace(f"G1020/Images/{image}", f"ORIGA_square_sorted/0/{image}")
+#     else:
+#         os.replace(f"G1020/Images/{image}", f"ORIGA_square_sorted/1/{image}")
 
-    # train the network for 250 epochs (setting aside 20% of the training data as validation data)
-    network.fit(training_X, training_y, validation_split=0.2, epochs=250, callbacks=[csv_logger])
+# def train_network(network, training_X, training_y, oct, lr):
+#     # create the algorithm that learns the weight of the network 
+#     optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
+#     # create the loss function function that tells optimizer how much error it has in its predictions
+#     if oct == 1:
+#         loss_function = tf.keras.losses.MeanSquaredError()
+#         network.compile(optimizer=optimizer, loss=loss_function, metrics=["mse"])
+
+#     else:
+#         loss_function = tf.keras.losses.Spaor
+#     #     csv_fname = "accuracy.csv"
+
+
+#     csv_logger = tf.keras.callbacks.CSVLogger(csv_fname)
+
+#     # train the network for 250 epochs (setting aside 20% of the training data as validation data)
+#     network.fit(training_X, training_y, validation_split=0.2, epochs=250, callbacks=[csv_logger])
 
 
 
@@ -92,15 +82,15 @@ def main():
     if directory == 'G1020':
         labeldata = pd.read_csv(f'G1020/G1020.csv')
         for file in os.listdir('G1020/Images'):
-            shutil.copy(f'G1020/Images/{file}', f'G1020/copy/{file}')
+            shutil.copy(f'G1020/Images/{file}', f'G1020_copy/{file}')
      
-        for filename in os.listdir('G1020/copy'):
-            f = os.path.join('G1020/copy', filename)
+        for filename in os.listdir('G1020_copy'):
+            f = os.path.join('G1020_copy', filename)
             if f.endswith(".json"):
                 os.remove(f)
         
-        for image in os.listdir('G1020/copy'):
-            imageindex =  os.listdir('G1020/copy').index(image)
+        for image in os.listdir('G1020_copy'):
+            imageindex =  os.listdir('G1020_copy').index(image)
             label = labeldata.loc[imageindex,"binaryLabels"]
             os.replace(f"G1020/Images/{image}", f"G1020_sorted/{label}/{image}")
 
@@ -132,10 +122,68 @@ def main():
 
     #     return networkG1020/Images
     
+#def train_validate(directory, batch_size, seed, split):
+#     ds_training = tf.keras.preprocessing.image_dataset_from_directory( 
+#         directory, 
+#         labels = "inferred", 
+#         label_mode = "binary",
+#         class_names = ["0", "1"], 
+#         color_mode = 'rgb',
+#         image_size = (2106, 1944), 
+#         shuffle = True ,
+#         seed = seed, 
+#         validation_split = split, 
+#         subset = "both"
+#     )
+#     ds_validation = tf.keras.preprocessing.image_dataset_from_directory( 
+#         directory, 
+#         labels = "inferred", 
+#         label_mode = "binary",
+#         class_names = ["0", "1"], 
+#         color_mode = 'rgb',
+#         image_size = (2106, 1944), 
+#         shuffle = True,
+#         seed = seed, 
+#         validation_split = (1 - split), 
+#         subset = "validation"
+#     )
+
+# # displays a given image from the training set along with its label
+# def view_image(index, training_X, training_y, label_names):
+#     # get the label and image from the training set
+#     label_num = training_y[index]
+#     if len(label_num.shape) > 0:
+#         label = label_names[training_y[index][0]]
+#     else:
+#         label = label_names[training_y[index]]
+#     image = training_X[index]
+
+#     # show the label then the image
+#     print("Label:", label)
+#     plt.imshow(image)
+#     plt.show()
 
 
+# def create_network(hct, oct):or image in os.listdir('G1020/Images'):
+#     if image in g1020zero['imageID']:
+#         os.replace(f"G1020/Images/{image}", f"ORIGA_square_sorted/0/{image}")
+#     else:
+#         os.replace(f"G1020/Images/{image}", f"ORIGA_square_sorted/1/{image}")
+
+# def train_network(network, training_X, training_y, oct, lr):
+#     # create the algorithm that learns the weight of the network 
+#     optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
+#     # create the loss function function that tells optimizer how much error it has in its predictions
+#     if oct == 1:
+#         loss_function = tf.keras.losses.MeanSquaredError()
+#         network.compile(optimizer=optimizer, loss=loss_function, metrics=["mse"])
+
+#     else:
+#         loss_function = tf.keras.losses.Spaor
+#     #     csv_fname = "accuracy.csv"
 
 
+#     csv_logger = tf.keras.callbacks.CSVLogger(csv_fname)
 
-if __name__ == "__main__":
-    main()
+#     # train the network for 250 epochs (setting aside 20% of the training data as validation data)
+#     network.fit(training_X, training_y, validation_split=0.2, epochs=250, callbacks=[csv_logger])
