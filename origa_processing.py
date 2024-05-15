@@ -81,7 +81,7 @@ def train_cnn(model, data, epochs, lr):
 
     return history
 
-def compare_lrs(n, data, lr):
+def compare_lrs(n, data):
     accs = {"Learning Rate": "Accuracy"}
     for lr in [0.0001, 0.001, 0.01, 0.1]:
         history = train_cnn(n, data, 100, lr)
@@ -147,47 +147,62 @@ def compare_batch_size():
 
 # Create CSV of compared learning rates
 
+csv_filename = "lr_accuracies_ORIGA_" + itype + ".csv"
+
+# data = tf.keras.utils.image_dataset_from_directory(
+#     directory, 
+#     shuffle=True, 
+#     seed=seed, 
+#     validation_split=split, 
+#     subset="both", 
+#     labels="inferred", 
+#     image_size=(32, 32), 
+#     label_mode="binary", 
+#     class_names=["0", "1"], 
+#     batch_size=32
+# )
+
 # n =create_cnn()
 # accs = compare_lrs(n, data)
 # accs_df = pd.DataFrame.from_dict(accs, orient='index')
-# accs_df.to_csv("origa_lr_accuracies.csv")
+# accs_df.to_csv(csv_filename)
 
 # Plot the learning rate CSV
 
-# lr_comp_df = pd.read_csv("origa_accuracies.csv")
-# lr_comp_df["Learning Rate"] = lr_comp_df["Learning Rate"].astype(str)
-# plot_bars(lr_comp_df, "Learning Rate", "Accuracy", "Learning Rate", "Learning Rate Accuracy Comparison",  "lr_comparison.png")
+lr_comp_df = pd.read_csv(csv_filename)
+lr_comp_df["Learning Rate"] = lr_comp_df["Learning Rate"].astype(str)
+plot_bars(lr_comp_df, "Learning Rate", "Accuracy", "Learning Rate", "Learning Rate Accuracy Comparison " + itype,  "lr_comparison_" + itype + ".png")
 
 
 # Measure accuracy on G1020 dataset
 
 
-data = tf.keras.utils.image_dataset_from_directory(
-    directory, 
-    shuffle=True, 
-    seed=seed, 
-    validation_split=split, 
-    subset="both", 
-    labels="inferred", 
-    image_size=(32, 32), 
-    label_mode="binary", 
-    class_names=["0", "1"], 
-    batch_size=32
-)
-g1020 = tf.keras.utils.image_dataset_from_directory(
-    g1020_dir, 
-    shuffle=True, 
-    labels="inferred", 
-    image_size=(32, 32), 
-    label_mode="binary", 
-    class_names=["0", "1"], 
-    batch_size=32
-)
+# data = tf.keras.utils.image_dataset_from_directory(
+#     directory, 
+#     shuffle=True, 
+#     seed=seed, 
+#     validation_split=split, 
+#     subset="both", 
+#     labels="inferred", 
+#     image_size=(32, 32), 
+#     label_mode="binary", 
+#     class_names=["0", "1"], 
+#     batch_size=32
+# )
+# g1020 = tf.keras.utils.image_dataset_from_directory(
+#     g1020_dir, 
+#     shuffle=True, 
+#     labels="inferred", 
+#     image_size=(32, 32), 
+#     label_mode="binary", 
+#     class_names=["0", "1"], 
+#     batch_size=32
+# )
 
-n = create_cnn()
-history = train_cnn(n, data, 100, 0.001)
-test_loss, test_acc = n.evaluate(g1020, verbose=2)
-print(test_acc)
+# n = create_cnn()
+# history = train_cnn(n, data, 100, 0.001)
+# test_loss, test_acc = n.evaluate(g1020, verbose=2)
+# print(test_acc)
 
 
 # Single Run
