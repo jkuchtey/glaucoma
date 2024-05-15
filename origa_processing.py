@@ -16,7 +16,7 @@ itype = "cropped"
 directory = "ORIGA_" + itype + "_sorted"
 batch_size = 32
 seed = 1234
-split = 0.25
+split = 0.7
 hct = 10
 lr = 0.0001
 
@@ -51,7 +51,7 @@ def create_cnn():
     model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
     model.add(layers.MaxPooling2D((2, 2)))
     model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-    model.add(layers.MaxPooling2D((2, 2)))
+    model.add(layers.MoraxPooling2D((2, 2)))
     model.add(layers.Conv2D(64, (3, 3), activation='relu'))
 
     model.add(layers.Flatten())
@@ -79,7 +79,7 @@ def train_cnn(model, data, epochs, lr):
 
     return history
 
-def compare_lrs(n, data):
+def compare_lrs(n, data, lr):
     accs = {"Learning Rate": "Accuracy"}
     for lr in [0.0001, 0.001, 0.01, 0.1]:
         history = train_cnn(n, data, 100, lr)
@@ -89,27 +89,18 @@ def compare_lrs(n, data):
 
     return accs
 
-def plot_bars(df, x, y, fill, title, filename):
-
+def plot_lrs(df):
+    print(df)
     acc_bar = (
         ggplot(df)
-        + aes(x=x, y=y, fill=fill) 
+        + aes(x="Learning Rate", y="Accuracy", fill="Learning Rate")
         + geom_col()
-        + ggtitle(title)
+        + ggtitle("Learning Rate Comparison")
+        + scale_alpha()
     )
-    acc_bar.save(filename=filename)
+    acc_bar.save(filename="lr_comparison.png")
 
-def plot_epochs(history):
-    plt.plot(history.history['accuracy'], label='accuracy')
-    plt.plot(history.history['val_accuracy'], label = 'val_accuracy')
-    plt.xlabel('Epoch')
-    plt.ylabel('Accuracy')
-    plt.ylim([0.5, 1])
-    plt.legend(loc='lower right')
-
-    plt.show()
-
-
+n =create_cnn()
 def compare_batch_size():
     accs = {"Batch Size": "Accuracy"}
     for bs in [10, 20, 32, 50, 70]:
@@ -125,15 +116,12 @@ def compare_batch_size():
             class_names=["0", "1"], 
             batch_size=bs
         )
-        n = create_cnn()
         history = train_cnn(n, data, 100, 0.001)
         test_loss, test_acc = n.evaluate(data[1], verbose=2)
         accs[bs] = test_acc
 
     return accs
 
-
-#Create CSV Comparing Batch Sizes
 # accs = compare_batch_size()
 # print(accs)
 # bs_comp_df = pd.DataFrame.from_dict(accs, orient='index')
