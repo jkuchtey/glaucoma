@@ -12,10 +12,10 @@ import PIL.Image
 import pprint
 from plotnine import *
 
-directory = "ORIGA_cropped_sorted"
+directory = "ORIGA_square_sorted"
 batch_size = 32
 seed = 1234
-split = 0.7
+split = 0.25
 hct = 10
 lr = 0.01
 
@@ -198,7 +198,7 @@ def train_cnn(model, data, epochs, lr):
 
     return history
 
-def compare_lrs(n, data, lr):
+def compare_lrs(n, data):
     accs = {"Learning Rate": "Accuracy"}
     for lr in [0.0001, 0.001, 0.01, 0.1]:
         history = train_cnn(n, data, 100, lr)
@@ -212,14 +212,13 @@ def plot_lrs(df):
     print(df)
     acc_bar = (
         ggplot(df)
-        + aes(x="Learning Rate", y="Accuracy", fill="Learning Rate")
+        + aes(x="Learning Rate", y="Accuracy", color="factor(Learning Rate)") 
         + geom_col()
         + ggtitle("Learning Rate Comparison")
-        + scale_alpha()
     )
     acc_bar.save(filename="lr_comparison.png")
 
-n =create_cnn()
+
 def compare_batch_size():
     accs = {"Batch Size": "Accuracy"}
     for bs in [10, 20, 32, 50, 70]:
@@ -256,12 +255,17 @@ data = tf.keras.utils.image_dataset_from_directory(
     class_names=["0", "1"], 
     batch_size=32
 )
-history = train_cnn(n, data, 100, 0.001)
-test_loss, test_acc = n.evaluate(data[1], verbose=2)
-print(test_acc)
-# accs = compare_lrs()
+# history = train_cnn(n, data, 100, 0.001)
+# test_loss, test_acc = n.evaluate(data[1], verbose=2)
+# print(test_acc)
+
+# n =create_cnn()
+# accs = compare_lrs(n, data)
 # accs_df = pd.DataFrame.from_dict(accs, orient='index')
-# plot_lrs(accs_df)
+# accs_df.to_csv("origa_accuracies.csv")
+
+
+plot_lrs(pd.read_csv("origa_accuracies.csv"))
 
 
 
