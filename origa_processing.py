@@ -11,7 +11,7 @@ import PIL.Image
 import pprint
 from plotnine import *
 
-itype = "square"
+itype = "cropped"
 
 directory = "ORIGA_" + itype + "_sorted"
 batch_size = 32
@@ -19,52 +19,6 @@ seed = 1234
 split = 0.25
 hct = 10
 lr = 0.0001
-
-# Scale images
-
-def scale(data):
-
-    # testing_X = np.empty([batch_ct * batch_size, 4])
-    # testing_y = np.empty([batch_ct * batch_size, 1])
-
-    # iterator = next(iter(data))
-    # batch_ct = len(data)
-
-
-
-    # tx = np.empty([batch_ct * batch_size, 4])
-    # ty = np.empty([batch_ct * batch_size, 1])
-    # for i in range(batch_ct):
-    #     for x, y in iterator:
-    #         # print(x.numpy().shape, "\n\n")
-    #         np.append(tx, x.numpy())
-    #         #training_X.np.append(x.numpy())
-    #         np.append(ty, y.numpy())
-    #         #training_y.append(y.numpy())
-
-    #     # for x, y in iterator:
-    #     #     np.append(testing_X, x.numpy())
-    #     #     # testing_X.append(x.numpy())
-    #     #     np.append(testing_y, y.numpy())
-    #     #     # testing_y.append(y.numpy())
-    # iterator = next(iter(data))
-
-    # training_X = data[0].map(lambda x,y: (x/255, y))
-    # training_y = data[0].map(lambda x, y: y)
-    
-    # testing_X = data[1].map(lambda x,y: (x/255, y))
-    # testing_y = data[1].map(lambda x, y: y) 
-
-    for x, y in data[0]:
-        training_X = x/255
-        training_y = y
-    for x, y in data[1]:
-        testing_X = x/255
-        testing_y = y
-
-    
-    return training_X, training_y, testing_X, testing_y
-
 
 
 # for i in [0, 1]:
@@ -89,54 +43,6 @@ def show_imgs(data):
 # print(data[0].class_names)
 
 
-def create_model(num_classes):
-    model = tf.keras.Sequential([
-    tf.keras.layers.Rescaling(1./255),
-    tf.keras.layers.Conv2D(32, 3, activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(32, 3, activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(32, 3, activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(128, activation='relu'),
-    tf.keras.layers.Dense(num_classes)
-    ])
-
-    model.compile(
-    optimizer='adam',
-    loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-    metrics=['accuracy'])
-
-    return model
-
-def train_model(model, training, testing, epochs):
-    csv_fname  = "epoch_log.csv"
-
-    csv_logger = tf.keras.callbacks.CSVLogger(csv_fname)
-
-    model.fit(
-        training,
-        validation_data=testing,
-        epochs=epochs, 
-        callbacks=[csv_logger]
-    )
-
-def train_network(network, training_X, training_y, epochs):
-    # create the algorithm that learns the weight of the network (with a learning rate of 0.0001)
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
-    
-    # create the loss function function that tells optimizer how much error it has in its predictions
-    loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-    
-    # prepare the network for training
-    network.compile(optimizer=optimizer, loss=loss_function, metrics=["accuracy"])
-    
-    # create a logger to save the training details to file
-    csv_logger = tf.keras.callbacks.CSVLogger('epochs.csv')
-    
-    # train the network for 20 epochs (setting aside 20% of the training data as validation data)
-    network.fit(training_X, training_y, validation_split=0.2, epochs=epochs, callbacks=[csv_logger])
 
 
 def create_cnn():
@@ -235,9 +141,20 @@ def compare_batch_size():
 
 
 #Plot accuracies comparing batch size
-bs_comp_df = pd.read_csv("batch_size_comparison_ORIGA_" + itype + ".csv")
-bs_comp_df["Batch Size"] = bs_comp_df["Batch Size"].astype(str)
-plot_bars(bs_comp_df, "Batch Size", "Accuracy", "Batch Size", "Batch Size Accuracy Comparison " + itype,  "bs_comparison_" + itype + ".png" )
+# bs_comp_df = pd.read_csv("batch_size_comparison_ORIGA_" + itype + ".csv")
+# print(bs_comp_df)
+# bs_comp_df["Batch Size"] = bs_comp_df["Batch Size"].astype(str)
+# plot_bars(bs_comp_df, "Batch Size", "Accuracy", "Batch Size", "Batch Size Accuracy Comparison " + itype,  "bs_comparison_" + itype + ".png" )
+
+
+
+
+# Create CSV of compared learning rates
+# n =create_cnn()
+# accs = compare_lrs(n, data)
+# accs_df = pd.DataFrame.from_dict(accs, orient='index')
+# accs_df.to_csv("origa_lr_accuracies.csv")
+
 
 # Single Run
 # data = tf.keras.utils.image_dataset_from_directory(
@@ -255,16 +172,6 @@ plot_bars(bs_comp_df, "Batch Size", "Accuracy", "Batch Size", "Batch Size Accura
 # history = train_cnn(n, data, 100, 0.001)
 # test_loss, test_acc = n.evaluate(data[1], verbose=2)
 # print(test_acc)
-
-
-# Create CSV of compared learning rates
-# n =create_cnn()
-# accs = compare_lrs(n, data)
-# accs_df = pd.DataFrame.from_dict(accs, orient='index')
-# accs_df.to_csv("origa_lr_accuracies.csv")
-
-
-
 
 # Plot the learning rate CSV
 # lr_comp_df = pd.read_csv("origa_accuracies.csv")
