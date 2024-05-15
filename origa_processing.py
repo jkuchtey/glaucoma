@@ -1,5 +1,4 @@
 import tensorflow as tf
-import tensorflow_datasets as tfds
 from tensorflow.keras import layers, models
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -12,7 +11,9 @@ import PIL.Image
 import pprint
 from plotnine import *
 
-directory = "ORIGA_square_sorted"
+itype = "cropped"
+
+directory = "ORIGA_" + itype + "_sorted"
 batch_size = 32
 seed = 1234
 split = 0.25
@@ -256,13 +257,13 @@ def compare_batch_size():
 # accs = compare_batch_size()
 # print(accs)
 # bs_comp_df = pd.DataFrame.from_dict(accs, orient='index')
-# bs_comp_df.to_csv("batch_size_comparison" + directory + )
+# bs_comp_df.to_csv("batch_size_comparison_ORIGA_" + itype + ".csv")
 
 
 #Plot accuracies comparing batch size
-# bs_comp_df = pd.read_csv("batch_size_comparison.csv")
-# bs_comp_df["Batch Size"] = bs_comp_df["Batch Size"].astype(str)
-# plot_bars(bs_comp_df, "Batch Size", "Accuracy", "Batch Size", "Batch Size Accuracy Comparison",  "bs_comparison.png")
+bs_comp_df = pd.read_csv("batch_size_comparison_ORIGA_cropped.csv")
+bs_comp_df["Batch Size"] = bs_comp_df["Batch Size"].astype(str)
+plot_bars(bs_comp_df, "Batch Size", "Accuracy", "Batch Size", "Batch Size Accuracy Comparison",  "bs_comparison.png")
 
 # Single Run
 # data = tf.keras.utils.image_dataset_from_directory(
