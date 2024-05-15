@@ -1,6 +1,4 @@
 import tensorflow as tf
-import tensorflow_datasets as tfds
-from tensorflow.keras import layers, models
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -9,174 +7,86 @@ import os
 import pathlib
 import PIL
 import PIL.Image
-import pprint
-from plotnine import *
 
-directory = "ORIGA_cropped_sorted"
+directory = str(sys.argv[1] + "_square_sorted")
 batch_size = 32
 seed = 1234
 split = 0.7
-hct = 10
 lr = 0.01
 
-# Scale images
 
-def scale(data):
-
-    # testing_X = np.empty([batch_ct * batch_size, 4])
-    # testing_y = np.empty([batch_ct * batch_size, 1])
-
-    # iterator = next(iter(data))
-    # batch_ct = len(data)
-
-
-
-    # tx = np.empty([batch_ct * batch_size, 4])
-    # ty = np.empty([batch_ct * batch_size, 1])
-    # for i in range(batch_ct):
-    #     for x, y in iterator:
-    #         # print(x.numpy().shape, "\n\n")
-    #         np.append(tx, x.numpy())
-    #         #training_X.np.append(x.numpy())
-    #         np.append(ty, y.numpy())
-    #         #training_y.append(y.numpy())
-
-    #     # for x, y in iterator:
-    #     #     np.append(testing_X, x.numpy())
-    #     #     # testing_X.append(x.numpy())
-    #     #     np.append(testing_y, y.numpy())
-    #     #     # testing_y.append(y.numpy())
-    # iterator = next(iter(data))
-
-    # training_X = data[0].map(lambda x,y: (x/255, y))
-    # training_y = data[0].map(lambda x, y: y)
-    
-    # testing_X = data[1].map(lambda x,y: (x/255, y))
-    # testing_y = data[1].map(lambda x, y: y) 
-
-    for x, y in data[0]:
-        training_X = x/255
-        training_y = y
-    for x, y in data[1]:
-        testing_X = x/255
-        testing_y = y
-
-    
-    return training_X, training_y, testing_X, testing_y
+ds_training = tf.keras.preprocessing.image_dataset_from_directory( 
+    directory, 
+    labels = "inferred", 
+    label_mode = "categorical",
+    class_names = ["0", "1"], 
+    color_mode = 'rgb',
+    batch_size = batch_size, 
+    image_size = (4, 4), 
+    shuffle = True ,
+    seed = seed, 
+    validation_split = split, 
+    subset = "training"
+)
 
 
+ds_validation = tf.keras.preprocessing.image_dataset_from_directory( 
+    directory, 
+    labels = "inferred", 
+    label_mode = "binary",
+    class_names = ["0", "1"], 
+    color_mode = 'rgb',
+    batch_size = batch_size, 
+    image_size = (157, 128), 
+    shuffle = True,
+    seed = seed, 
+    validation_split = (1 - split), 
+    subset = "validation"
+)
 
-# for i in [0, 1]:
-#     ds = data[i].map(lambda xn =create_cnn()
-# history = train_cnn(n, data, 100)g
+# displays a given image from the training set along with its label
+def view_image(index, training_X, training_y, label_names):
+    # get the label and image from the training set
+    label_num = training_y[index]
+    if len(label_num.shape) > 0:
+        label = label_names[training_y[index][0]]
+    else:
+        label = label_names[training_y[index]]
+    image = training_X[index]
 
-def show_imgs(data):
-    data_iterator = data.as_numpy_iterator()
-    batch = data_iterator.next()
-    fig, ax = plt.subplots(ncols=5, figsize=(20,20))
-
-
-    #show images
-    for idx, img in enumerate(batch[0][:5]):
-        ax[idx].imshow(img)
-        ax[idx].title.set_text(batch[1][idx])
-    batch = data_iterator.next()
-
+    # show the label then the image
+    print("Label:", label)
+    plt.imshow(image)
     plt.show()
-#Seperate labels and attributes
-
-# print(data[0].class_names)
 
 
-def create_model(num_classes):
-    model = tf.keras.Sequential([
-    tf.keras.layers.Rescaling(1./255),
-    tf.keras.layers.Conv2D(32, 3, activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(32, 3, activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(32, 3, activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(128, activation='relu'),
-    tf.keras.layers.Dense(num_classes)
-    ])
+def create_network(hct, oct):
+    hidden_layer = tf.keras.layers.Dense(hct, activation='sigmoid') 
+    output_layer = tf.keras.layers.Dense(oct)
 
-    model.compile(
-    optimizer='adam',
-    loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-    metrics=['accuracy'])
-
-    return model
-
-def train_model(model, training, testing, epochs):
-    csv_fname  = "epoch_log.csv"
-
-    csv_logger = tf.keras.callbacks.CSVLogger(csv_fname)
-
-    model.fit(
-        training,
-        validation_data=testing,
-        epochs=epochs, 
-        callbacks=[csv_logger]
-    )
-
-def lab8_cnn(training_X, training_y):
-    # get the shape of each image so the the first layer knows what inputs it will receive
-    image_shape = training_X.shape[1:]
-
-    # if the image was grayscale, add a 1 to the end of the shape to make it 3D
-    if len(image_shape) == 2:
-        image_shape = (image_shape[0], image_shape[1], 1)
-
-    # get the number of possible labels (since this is a classification task)
-    num_labels = len(np.unique(testing_y))
-    
-    # create the layers
-    conv1 = tf.keras.layers.Conv2D(16, (3, 3), activation = "relu", input_shape=image_shape)
-    pool1 = tf.keras.layers.MaxPooling2D((2, 2))
-    flat = tf.keras.layers.Flatten()
-    dense = tf.keras.layers.Dense(128)
-    out = tf.keras.layers.Dense(num_labels)
-
-    # convert the layers into a neural network model
-    layers = [conv1, pool1, flat, dense, out]    
-    # layers = [conv1, pool1, conv2, flat, dense, out]    
-    # layers = [conv1, pool1, conv2, pool2, conv3, flat, dense, out]    
-    network = tf.keras.models.Sequential(layers)
+    all_layers = [hidden_layer, output_layer]
+    network = tf.keras.models.Sequential(all_layers)
 
     return network
 
-def train_network(network, training_X, training_y, epochs):
-    # create the algorithm that learns the weight of the network (with a learning rate of 0.0001)
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
-    
+def train_network(network, training_X, training_y, oct, lr):
+    # create the algorithm that learns the weight of the network 
+    optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
     # create the loss function function that tells optimizer how much error it has in its predictions
-    loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-    
+    if oct == 1:
+        loss_function = tf.keras.losses.MeanSquaredError()
+        network.compile(optimizer=optimizer, loss=loss_function, metrics=["mse"])
+
+    else:
+        loss_function = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        network.compile(optimizer=optimizer, loss=loss_function, metrics=["accuracy"])
+
     # prepare the network for training
-    network.compile(optimizer=optimizer, loss=loss_function, metrics=["accuracy"])
-    
+
     # create a logger to save the training details to file
-    csv_logger = tf.keras.callbacks.CSVLogger('epochs.csv')
-    
-    # train the network for 20 epochs (setting aside 20% of the training data as validation data)
-    network.fit(training_X, training_y, validation_split=0.2, epochs=epochs, callbacks=[csv_logger])
-
-
-def create_cnn():
-    model = models.Sequential()
-    tf.keras.layers.Rescaling(1./255)
-    model.add(layers.Conv2D(32, (3, 3), activation='relu', input_shape=(32, 32, 3)))
-    model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-    model.add(layers.MaxPooling2D((2, 2)))
-    model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-
-    model.add(layers.Flatten())
-    model.add(layers.Dense(64, activation='relu'))
-    model.add(layers.Dense(10))
-
+    csv_fname  = "test.csv"
+    # if oct > 1:
+    #     csv_fname = "accuracy.csv"
 
     return model
 
@@ -275,24 +185,44 @@ print(test_acc)
 # accs_df = pd.DataFrame.from_dict(accs, orient='index')
 # plot_lrs(accs_df)
 
+    csv_logger = tf.keras.callbacks.CSVLogger(csv_fname)
+
+    # train the network for 250 epochs (setting aside 20% of the training data as validation data)
+    network.fit(training_X, training_y, validation_split=0.2, epochs=250, callbacks=[csv_logger])
 
 
 
+    for x, y in ds:
+        if not set_X:
+            set_X = [x]
+        else:
+            set_X = set_X.append(x)
+        if not set_y:
+            set_y = [y]
+        else:
+            set_y = set_y.append(y)
+
+    return set_X, set_y
+
+# training_X, training_y = sep_x_y(ds_training)
+# testing_X, testing_y = sep_x_y(ds_validation)
+
+train_x_batches = np.concatenate([x for x, y in ds_training], axis=0)
+train_y_batches = np.concatenate([y for x, y in ds_training], axis=0)
+
+print(train_x_batches.shape)
+print(train_y_batches.shape)
+
+
+# x_train = ds_training.map(lambda i: i['image'])
+# y_train = ds_training.map(lambda l: l['label'])
+# x_test = ds_validation.map(lambda x: x['image'])
+# y_test = ds_validation.map(lambda y: y['label'])
 
 
 
-
-# training_X, training_y, testing_X, testing_y = scale(data)
-# print(len(training_X))
-
-
-
-
-
-
-# Sequential Model
-# model = create_model(2)
-# train_model(model, data[0], data[1], 3)
+n = create_network(hct, 2)
+train_network(n, train_x_batches, train_y_batches, 2, lr)
 
 #CNN
 # cnn_network = create_cnn(training_X, training_y)
