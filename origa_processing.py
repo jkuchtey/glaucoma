@@ -11,7 +11,7 @@ import PIL.Image
 import pprint
 from plotnine import *
 
-itype = "square"
+itype = "cropped"
 
 g1020_dir = "G1020_sorted"
 
@@ -102,6 +102,16 @@ def plot_bars(df, x, y, fill, title, filename):
     acc_bar.save(filename=filename)
 
 
+def plot_epochs(history):
+    plt.plot(history.history['accuracy'], label='accuracy')
+    plt.plot(history.history['val_accuracy'], label = 'val_accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.ylim([0.5, 1])
+    plt.legend(loc='lower right')
+
+    plt.savefig(fname="optimalmodelepochs.png")
+
 
 n =create_cnn()
 def compare_batch_size():
@@ -147,7 +157,7 @@ def compare_batch_size():
 
 # Create CSV of compared learning rates
 
-csv_filename = "lr_accuracies_ORIGA_" + itype + ".csv"
+# csv_filename = "lr_accuracies_ORIGA_" + itype + ".csv"
 
 # data = tf.keras.utils.image_dataset_from_directory(
 #     directory, 
@@ -169,9 +179,9 @@ csv_filename = "lr_accuracies_ORIGA_" + itype + ".csv"
 
 # Plot the learning rate CSV
 
-lr_comp_df = pd.read_csv(csv_filename)
-lr_comp_df["Learning Rate"] = lr_comp_df["Learning Rate"].astype(str)
-plot_bars(lr_comp_df, "Learning Rate", "Accuracy", "Learning Rate", "Learning Rate Accuracy Comparison " + itype,  "lr_comparison_" + itype + ".png")
+# lr_comp_df = pd.read_csv(csv_filename)
+# lr_comp_df["Learning Rate"] = lr_comp_df["Learning Rate"].astype(str)
+# plot_bars(lr_comp_df, "Learning Rate", "Accuracy", "Learning Rate", "Learning Rate Accuracy Comparison " + itype,  "lr_comparison_" + itype + ".png")
 
 
 # Measure accuracy on G1020 dataset
@@ -219,9 +229,11 @@ plot_bars(lr_comp_df, "Learning Rate", "Accuracy", "Learning Rate", "Learning Ra
 #     class_names=["0", "1"], 
 #     batch_size=32
 # )
-# history = train_cnn(n, data, 100, 0.001)
+# history = train_cnn(n, data, 250, 0.001)
 # test_loss, test_acc = n.evaluate(data[1], verbose=2)
 # print(test_acc)
+
+# plot_epochs(history)
 
 
 
