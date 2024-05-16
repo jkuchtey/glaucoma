@@ -236,6 +236,25 @@ def compare_batch_size():
 # plot_epochs(history)
 
 
+# Single Run With G1020
+
+# data = tf.keras.utils.image_dataset_from_directory(
+#     g1020_dir, 
+#     shuffle=True, 
+#     seed=seed, 
+#     validation_split=split, 
+#     subset="both", 
+#     labels="inferred", 
+#     image_size=(32, 32), 
+#     label_mode="binary", 
+#     class_names=["0", "1"], 
+#     batch_size=32
+# )
+
+# history = train_cnn(n, data, 250, 0.001)
+# test_loss, test_acc = n.evaluate(data[1], verbose=2)
+# print(test_acc)
+
 
 
 
